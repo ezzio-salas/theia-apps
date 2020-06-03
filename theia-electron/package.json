@@ -25,7 +25,8 @@
         "start": "electron scripts/theia-electron-main.js",
         "package": "electron-builder",
         "package:preview": "electron-builder --dir",
-        "download:plugins": "theia download:plugins"
+        "download:plugins": "theia download:plugins",
+        "release": "build"
     },
     "keywords": [],
     "author": "typefox <npm@typefox.io>",
