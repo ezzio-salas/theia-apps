@@ -73,7 +73,7 @@ after_failure:
   script: cd $TRAVIS_BUILD_DIR && ./commit_screenshots.sh
 
 before_deploy:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+#  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 deploy:
   provider: script
