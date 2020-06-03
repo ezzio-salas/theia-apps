@@ -26,7 +26,7 @@
         "package": "electron-builder",
         "package:preview": "electron-builder --dir",
         "download:plugins": "theia download:plugins",
-        "release": "build"
+        "release": "electron-builder --publish always"
     },
     "keywords": [],
     "author": "typefox <npm@typefox.io>",
