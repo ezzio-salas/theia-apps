@@ -6,44 +6,55 @@ git:
 
 branches:
   only:
-  - master
+  #- master
+  - travis-ci
 
-language: generic
+language: node_js
+node_js: "10"
 
 addons:
   apt:
     update: true
     sources:
     - ubuntu-toolchain-r-test
+    packages: libxkbfile-dev
     chrome: stable
 
 env:
-  - NPM_TAG=latest IMAGE_NAME=theia-full NODE_VERSION=10.15.3
-  - NPM_TAG=next IMAGE_NAME=theia-full NODE_VERSION=10.15.3
-  - NPM_TAG=latest IMAGE_NAME=theia NODE_VERSION=10
-  - NPM_TAG=next IMAGE_NAME=theia NODE_VERSION=10
-  - NPM_TAG=latest IMAGE_NAME=theia-java NODE_VERSION=10
-  - NPM_TAG=next IMAGE_NAME=theia-java NODE_VERSION=10
-  - NPM_TAG=latest IMAGE_NAME=theia-go NODE_VERSION=10
-  - NPM_TAG=next IMAGE_NAME=theia-go NODE_VERSION=10
-  - NPM_TAG=latest IMAGE_NAME=theia-python NODE_VERSION=10
-  - NPM_TAG=next IMAGE_NAME=theia-python NODE_VERSION=10
-  - NPM_TAG=latest IMAGE_NAME=theia-swift NODE_VERSION=10
-  - NPM_TAG=next IMAGE_NAME=theia-swift NODE_VERSION=10
-  - NPM_TAG=latest IMAGE_NAME=theia-cpp NODE_VERSION=10.15.3
-  - NPM_TAG=next IMAGE_NAME=theia-cpp NODE_VERSION=10.15.3
-  - NPM_TAG=next IMAGE_NAME=theia-rust NODE_VERSION=10.15.3
-  - NPM_TAG=latest IMAGE_NAME=theia-dart NODE_VERSION=10
-  - NPM_TAG=next IMAGE_NAME=theia-dart NODE_VERSION=10
-  - NPM_TAG=latest IMAGE_NAME=theia-https NODE_VERSION=10 ENV_VARS="-e token=" PORT=10443
-  - NPM_TAG=next IMAGE_NAME=theia-https NODE_VERSION=10 ENV_VARS="-e token=" PORT=10443
-  - NPM_TAG=latest IMAGE_NAME=theia-php NODE_VERSION=10
-  - NPM_TAG=next IMAGE_NAME=theia-php NODE_VERSION=10
+#  - NPM_TAG=latest IMAGE_NAME=theia-full NODE_VERSION=10.15.3
+#  - NPM_TAG=next IMAGE_NAME=theia-full NODE_VERSION=10.15.3
+#  - NPM_TAG=latest IMAGE_NAME=theia NODE_VERSION=10
+#  - NPM_TAG=next IMAGE_NAME=theia NODE_VERSION=10
+#  - NPM_TAG=latest IMAGE_NAME=theia-java NODE_VERSION=10
+#  - NPM_TAG=next IMAGE_NAME=theia-java NODE_VERSION=10
+#  - NPM_TAG=latest IMAGE_NAME=theia-go NODE_VERSION=10
+#  - NPM_TAG=next IMAGE_NAME=theia-go NODE_VERSION=10
+#  - NPM_TAG=latest IMAGE_NAME=theia-python NODE_VERSION=10
+#  - NPM_TAG=next IMAGE_NAME=theia-python NODE_VERSION=10
+#  - NPM_TAG=latest IMAGE_NAME=theia-swift NODE_VERSION=10
+#  - NPM_TAG=next IMAGE_NAME=theia-swift NODE_VERSION=10
+#  - NPM_TAG=latest IMAGE_NAME=theia-cpp NODE_VERSION=10.15.3
+#  - NPM_TAG=next IMAGE_NAME=theia-cpp NODE_VERSION=10.15.3
+#  - NPM_TAG=next IMAGE_NAME=theia-rust NODE_VERSION=10.15.3
+#  - NPM_TAG=latest IMAGE_NAME=theia-dart NODE_VERSION=10
+#  - NPM_TAG=next IMAGE_NAME=theia-dart NODE_VERSION=10
+#  - NPM_TAG=latest IMAGE_NAME=theia-https NODE_VERSION=10 ENV_VARS="-e token=" PORT=10443
+#  - NPM_TAG=next IMAGE_NAME=theia-https NODE_VERSION=10 ENV_VARS="-e token=" PORT=10443
+#  - NPM_TAG=latest IMAGE_NAME=theia-php NODE_VERSION=10
+#  - NPM_TAG=next IMAGE_NAME=theia-php NODE_VERSION=10
+
+jobs:
+  # add installer builds to jobs matrix
+  include:
+    - os: linux
+      env: IMAGE_NAME=theia-electron
+    - os: osx
+      env: IMAGE_NAME=theia-electron
+    - os: windows
+      env: IMAGE_NAME=theia-electron
 
 before_install:
-- nvm install 10
-- nvm use 10
-- npm install -g eclint
+- npm install -g eclint yarn
 - eclint check "**/*" || echo "Warning! Formatting errors encountered..."
 
 install:
@@ -52,10 +63,11 @@ install:
   - "travis_wait 30 sleep 1800 &"
   # check if there were changes since the previous commit in this image
   # if not (script returns 137) then the build process is terminated
-  - ./check_changed.sh $IMAGE_NAME ; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 137 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
-  - ./build_container.sh $NPM_TAG $IMAGE_NAME $NODE_VERSION $PORT $ENV_VARS
+  # - ./check_changed.sh $IMAGE_NAME ; RETURN_CODE=$? ; if [ $RETURN_CODE -eq 137 ]; then travis_terminate 0; elif [ $RETURN_CODE -ne 0 ]; then travis_terminate $RETURN_CODE; fi
+  # - ./build_container.sh $NPM_TAG $IMAGE_NAME $NODE_VERSION $PORT $ENV_VARS
 
-script: cd tests; yarn; yarn test-app-$IMAGE_NAME
+script: cd "$IMAGE_NAME" && yarn && yarn package
+# script: cd tests; yarn; yarn test-app-$IMAGE_NAME
 
 after_failure:
   script: cd $TRAVIS_BUILD_DIR && ./commit_screenshots.sh
